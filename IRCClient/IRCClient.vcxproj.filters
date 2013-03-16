@@ -1,0 +1,153 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>f75580c3-3606-43bf-834b-0a75cf5c9974</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets">
+      <UniqueIdentifier>dd8aa52b-bee3-4786-a368-7b88f23a0256</UniqueIdentifier>
+    </Filter>
+    <Page Include="Common\StandardStyles.xaml">
+      <Filter>Common</Filter>
+    </Page>
+    <Image Include="Assets\Logo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SmallLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\StoreLogo.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Filter Include="Deployment">
+      <UniqueIdentifier>{62d172f3-1557-4e53-a4e6-962cbfb48b61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{c08b9e0a-b146-4401-85c4-3399bbb7c70a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{c5945419-de0d-49d2-aa06-b3afeb3cf652}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{83d5b3b8-c768-4589-99f0-47e6a19624f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\Help">
+      <UniqueIdentifier>{5f229463-2b4d-48e5-8eb2-a91dd07f5103}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="App.xaml.cpp" />
+    <ClCompile Include="MainPage.xaml.cpp" />
+    <ClCompile Include="pch.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\BindableBase.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\BooleanToVisibilityConverter.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\BooleanNegationConverter.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\LayoutAwarePage.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\RichTextColumns.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\SuspensionManager.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="JoinChannelPage.xaml.cpp" />
+    <ClCompile Include="CommandOverview.xaml.cpp" />
+    <ClCompile Include="Credits.xaml.cpp" />
+    <ClCompile Include="GettingStarted.xaml.cpp" />
+    <ClCompile Include="HelpContents.xaml.cpp" />
+    <ClCompile Include="EditServer.xaml.cpp" />
+    <ClCompile Include="SelectServer.xaml.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="App.xaml.h" />
+    <ClInclude Include="MainPage.xaml.h" />
+    <ClInclude Include="pch.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\BindableBase.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\BooleanToVisibilityConverter.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\BooleanNegationConverter.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\LayoutAwarePage.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\RichTextColumns.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\SuspensionManager.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="JoinChannelPage.xaml.h" />
+    <ClInclude Include="CommandOverview.xaml.h" />
+    <ClInclude Include="Credits.xaml.h" />
+    <ClInclude Include="GettingStarted.xaml.h" />
+    <ClInclude Include="HelpContents.xaml.h" />
+    <ClInclude Include="EditServer.xaml.h" />
+    <ClInclude Include="SelectServer.xaml.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest">
+      <Filter>Deployment</Filter>
+    </AppxManifest>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="IRCClient_TemporaryKey.pfx">
+      <Filter>Deployment</Filter>
+    </None>
+    <None Include="Package.StoreAssociation.xml" />
+    <None Include="IRCClient_StoreKey.pfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Filter>UI</Filter>
+    </ApplicationDefinition>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="MainPage.xaml">
+      <Filter>UI</Filter>
+    </Page>
+    <Page Include="JoinChannelPage.xaml">
+      <Filter>UI</Filter>
+    </Page>
+    <Page Include="HelpContents.xaml">
+      <Filter>UI\Help</Filter>
+    </Page>
+    <Page Include="GettingStarted.xaml">
+      <Filter>UI\Help</Filter>
+    </Page>
+    <Page Include="CommandOverview.xaml">
+      <Filter>UI\Help</Filter>
+    </Page>
+    <Page Include="Credits.xaml">
+      <Filter>UI\Help</Filter>
+    </Page>
+    <Page Include="SelectServer.xaml">
+      <Filter>UI</Filter>
+    </Page>
+    <Page Include="EditServer.xaml">
+      <Filter>UI</Filter>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Common\ReadMe.txt">
+      <Filter>Common</Filter>
+    </Text>
+  </ItemGroup>
+</Project>

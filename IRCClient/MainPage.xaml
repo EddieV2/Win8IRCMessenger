@@ -1,0 +1,528 @@
+﻿<common:LayoutAwarePage
+    x:Name="pageRoot"
+    x:Class="IRCClient.MainPage"
+    DataContext="{Binding DefaultViewModel, RelativeSource={RelativeSource Self}}"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:IRCClient"
+    xmlns:common="using:IRCClient.Common"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" Background="#FF766060" Loaded="Page_Loaded_1" Unloaded="Page_Unloaded_1" SizeChanged="Page_SizeChanged_1">
+    
+    <Page.Resources>
+
+        <Style x:Key="JoinAppBarButtonStyle" TargetType="ButtonBase" BasedOn="{StaticResource AppBarButtonStyle}">
+            <Setter Property="AutomationProperties.AutomationId" Value="JoinAppBarButton"/>
+            <Setter Property="AutomationProperties.Name" Value="Join Room"/>
+            <Setter Property="Content" Value="&#xE109;"/>
+        </Style>
+
+        <Style x:Key="LeaveAppBarButtonStyle" TargetType="ButtonBase" BasedOn="{StaticResource AppBarButtonStyle}">
+            <Setter Property="AutomationProperties.AutomationId" Value="LeaveAppBarButton"/>
+            <Setter Property="AutomationProperties.Name" Value="Leave Room"/>
+            <Setter Property="Content" Value="&#xE108;"/>
+        </Style>
+        
+        <Style x:Key="DisconnectAppBarButtonStyle" TargetType="ButtonBase" BasedOn="{StaticResource AppBarButtonStyle}">
+            <Setter Property="AutomationProperties.AutomationId" Value="DisconnectAppBarButton"/>
+            <Setter Property="AutomationProperties.Name" Value="Disconnect"/>
+            <Setter Property="Content" Value="&#xE106;"/>
+        </Style>
+
+        <Style x:Key="ConfigureAppBarButtonStyle" TargetType="ButtonBase" BasedOn="{StaticResource AppBarButtonStyle}">
+            <Setter Property="AutomationProperties.AutomationId" Value="ConfigureAppBarButton"/>
+            <Setter Property="AutomationProperties.Name" Value="Join Servers"/>
+            <Setter Property="Content" Value="&#xE15E;"/>
+        </Style>
+        
+    </Page.Resources>
+
+    <Grid x:Name="LayoutRoot" Style="{StaticResource LayoutRootStyle}">
+        
+        <Grid x:Name="WelcomeMessage" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Margin="109,24,0,0" TextWrapping="Wrap" Text="Welcome to IRC Messenger" FontSize="36" HorizontalAlignment="Left" Width="447" Height="68" VerticalAlignment="Top"/>
+            <TextBlock Margin="112,71,0,-14" TextWrapping="Wrap" Text="To begin, please" FontSize="18" HorizontalAlignment="Left" Width="444" Height="52" VerticalAlignment="Top"/>
+            <TextBlock Margin="12,8,0,0" TextWrapping="Wrap" Text="&#xE134;" FontSize="72" FontFamily="Segoe UI Symbol" HorizontalAlignment="Left" Width="98" Height="95" VerticalAlignment="Top"/>
+            <HyperlinkButton x:Name="SelectAServerButton" Content="Select a Server" HorizontalAlignment="Left" Margin="199,57,0,0" VerticalAlignment="Top" Width="230" FontSize="20" Height="46" Click="SelectAServerButton_Click"/>
+            <TextBlock HorizontalAlignment="Left" Margin="432,3,0,0" TextWrapping="Wrap" Text="TwinDrills.com" VerticalAlignment="Top" Height="17" Width="120" FontSize="18"/>
+        </Grid>
+
+        <Grid x:Name="WelcomeMessageSmall" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Margin="20,8,0,0" TextWrapping="Wrap" Text="&#xE134;" FontSize="72" FontFamily="Segoe UI Symbol" HorizontalAlignment="Left" Width="98" Height="95" VerticalAlignment="Top"/>
+            <HyperlinkButton x:Name="SelectAServerSmallButton" Margin="90,8,0,0"  Content="Select a Server" HorizontalAlignment="Center" VerticalAlignment="Center" Width="200" FontSize="20" Height="46" Click="SelectAServerButton_Click"/>
+        </Grid>
+        
+        <ScrollViewer x:Name="messageScrollViewer" Margin="35,35,268,112" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Hidden">
+            <StackPanel x:Name="messageStackPanel" HorizontalAlignment="Center" Width="844" Height="621" />
+        </ScrollViewer>
+        <TextBox x:Name="sayTextBox" Margin="101,0,106,39" TextWrapping="Wrap" Height="28" VerticalAlignment="Bottom" KeyDown="sayTextBox_KeyDown"/>
+        
+        <!-- This is a bit of a hack, we need to use this to measure text for the IRC message blocks -->
+        <TextBlock x:Name="textMeasurementBox" HorizontalAlignment="Left" Height="AUto" Margin="10,-1000,0,0" TextWrapping="Wrap" Text="sdfsdfsdfsfsdfsd&#13;fsdfsdfsdfsd&#13;fsdfsd&#13;fsd\nsdfsdff" VerticalAlignment="Top" Width="Auto" FontFamily="Courier New"/>
+        <TextBlock x:Name="sayLabel" HorizontalAlignment="Left" Margin="43,0,0,39" TextWrapping="Wrap" Text="Say" Width="53" FontSize="22" FontWeight="Bold" Height="28" VerticalAlignment="Bottom"/>
+        <Button x:Name="sendButton" Content="&#xE0AE;" HorizontalAlignment="Right" Margin="0,0,35,33" VerticalAlignment="Bottom" RenderTransformOrigin="0.551,0.033" FontFamily="Segoe UI Symbol" FontSize="22" Foreground="White" BorderBrush="Transparent" Height="45" Width="66" Click="sendButton_Click"/>
+
+        <ListView x:Name="userScrollViewer" Margin="0,35,35,112" HorizontalAlignment="Right" Width="206" SelectionMode="None"/>
+        <Popup x:Name="userPopup">
+            <Grid Background="#FFE5E5E5" Height="Auto" Width="Auto">
+                <StackPanel Margin="0,0,0,0">
+                    <Button Content="Query" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0"/>
+                    <Frame HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0" Height="2" Background="LightGray"/>
+                    <Button Content="Op" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0"/>
+                    <Button Content="Deop" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0"/>
+                    <Button Content="Voice" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0"/>
+                    <Button Content="Devoice" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0"/>
+                    <Frame HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0" Height="2" Background="LightGray"/>
+                    <Button Content="Kick" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0"/>
+                    <Button Content="Kick, Why?" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0"/>
+                    <Frame HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0" Height="2" Background="LightGray"/>
+                    <Button Content="Ban" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0"/>
+                    <Button Content="Ban, Kick" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0"/>
+                    <Button Content="Ban, Kick, Why?" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0"/>
+                </StackPanel>
+            </Grid>
+        </Popup>
+
+        <!--
+        <ScrollViewer x:Name="userScrollViewer" Margin="0,35,35,112" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Hidden" HorizontalAlignment="Right" Width="206">
+            <StackPanel x:Name="userStackPanel" HorizontalAlignment="Center" VerticalAlignment="Top" />
+        </ScrollViewer>
+        -->
+
+
+
+        <VisualStateManager.VisualStateGroups>
+
+            <VisualStateGroup x:Name="ApplicationViewStates">
+
+                <!-- =========================================================================
+                            Default Visual State
+                     ========================================================================= -->
+                <VisualState x:Name="FullScreenLandscape">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sayTextBox" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sayLabel" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sendButton" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="userScrollViewer" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="messageScrollViewer" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="roomsLabel" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="serversLabel" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessage" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessageSmall" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+
+                <VisualState x:Name="Filled">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sayTextBox" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sayLabel" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sendButton" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="userScrollViewer" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="messageScrollViewer" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="roomsLabel" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="serversLabel" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessage" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessageSmall" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+
+                <!-- The back button and title have different styles when snapped -->
+                <VisualState x:Name="FullScreenPortrait">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sayTextBox" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sayLabel" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sendButton" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="userScrollViewer" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="messageScrollViewer" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="roomsLabel" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="serversLabel" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessage" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessageSmall" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+
+
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="titleLabel" Storyboard.TargetProperty="FontSize">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="20"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="titleLabel" Storyboard.TargetProperty="Width">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="190"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="titleLabel" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="20,29,0,0"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="serversLabel" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="204.5,16,0,0"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="serversScrollViewer" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="260,0,0,0"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="serversScrollViewer" Storyboard.TargetProperty="Width">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="170"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="roomsLabel" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="421,13,0,0"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="roomsScrollViewer" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="485,0,0,0"/>
+                        </ObjectAnimationUsingKeyFrames>
+
+                    </Storyboard>
+                </VisualState>
+
+                <!-- The back button and title have different styles when snapped -->
+                <VisualState x:Name="Snapped">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sayTextBox" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sayLabel" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sendButton" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="userScrollViewer" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="messageScrollViewer" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="roomsLabel" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="serversLabel" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessage" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessageSmall" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Visible"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+
+
+                <!-- =========================================================================
+                            Visual State When using normal windows.
+                     ========================================================================= -->
+                <VisualState x:Name="FullScreenLandscape_NormalWindow">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessage" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessageSmall" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+
+                <VisualState x:Name="Filled_NormalWindow">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessage" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessageSmall" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+
+                <!-- The back button and title have different styles when snapped -->
+                <VisualState x:Name="FullScreenPortrait_NormalWindow">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessage" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessageSmall" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="messageScrollViewer" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="20,20,20,110"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="userScrollViewer" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+
+
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="titleLabel" Storyboard.TargetProperty="FontSize">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="20"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="titleLabel" Storyboard.TargetProperty="Width">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="190"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="titleLabel" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="20,29,0,0"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="serversLabel" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="204.5,16,0,0"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="serversScrollViewer" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="260,0,0,0"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="serversScrollViewer" Storyboard.TargetProperty="Width">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="170"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="roomsLabel" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="421,13,0,0"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="roomsScrollViewer" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="485,0,0,0"/>
+                        </ObjectAnimationUsingKeyFrames>
+
+                    </Storyboard>
+                </VisualState>
+
+                <!-- The back button and title have different styles when snapped -->
+                <VisualState x:Name="Snapped_NormalWindow">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sayTextBox" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="20,0,20,20"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sayLabel" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sendButton" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="userScrollViewer" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="messageScrollViewer" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="20,20,20,70"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessage" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessageSmall" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+
+                <!-- =========================================================================
+                            Visual state when using dummy windows. 
+                     ========================================================================= -->
+                <VisualState x:Name="FullScreenLandscape_DummyWindow">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="userScrollViewer" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="messageScrollViewer" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="35,35,35,112"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessage" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessageSmall" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+
+                <VisualState x:Name="Filled_DummyWindow">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessage" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessageSmall" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="messageScrollViewer" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="35,35,35,112"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="userScrollViewer" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+
+                <!-- The back button and title have different styles when snapped -->
+                <VisualState x:Name="FullScreenPortrait_DummyWindow">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessage" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessageSmall" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="messageScrollViewer" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="20,20,20,110"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="userScrollViewer" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+
+
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="titleLabel" Storyboard.TargetProperty="FontSize">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="20"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="titleLabel" Storyboard.TargetProperty="Width">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="190"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="titleLabel" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="20,29,0,0"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="serversLabel" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="204.5,16,0,0"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="serversScrollViewer" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="260,0,0,0"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="serversScrollViewer" Storyboard.TargetProperty="Width">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="170"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="roomsLabel" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="421,13,0,0"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="roomsScrollViewer" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="485,0,0,0"/>
+                        </ObjectAnimationUsingKeyFrames>
+
+                    </Storyboard>
+                </VisualState>
+
+                <!-- The back button and title have different styles when snapped -->
+                <VisualState x:Name="Snapped_DummyWindow">
+                    <Storyboard>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sayTextBox" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="20,0,20,20"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sayLabel" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="sendButton" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="userScrollViewer" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="messageScrollViewer" Storyboard.TargetProperty="Margin">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="20,20,20,70"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessage" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                        <ObjectAnimationUsingKeyFrames Storyboard.TargetName="WelcomeMessageSmall" Storyboard.TargetProperty="Visibility">
+                            <DiscreteObjectKeyFrame KeyTime="0" Value="Collapsed"/>
+                        </ObjectAnimationUsingKeyFrames>
+                    </Storyboard>
+                </VisualState>
+
+            </VisualStateGroup>
+
+        </VisualStateManager.VisualStateGroups>
+
+
+    </Grid>
+    
+    <Page.TopAppBar>
+        <AppBar x:Name="TopAppBar1" AutomationProperties.Name="Top App Bar">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="85"/>
+                </Grid.RowDefinitions>
+                
+                    <TextBlock x:Name="titleLabel" HorizontalAlignment="Left" Height="40" Margin="22,23,0,0" TextWrapping="Wrap" Text="&#xE134; IRC Messenger" VerticalAlignment="Top" Width="250" Foreground="{StaticResource ComboBoxFocusedForegroundThemeBrush}" FontSize="30" FontFamily="Segoe UI Symbol"/>
+                    <TextBlock x:Name="serversLabel" HorizontalAlignment="Left" Height="40" Margin="264.5,16,0,0" TextWrapping="Wrap" Text="Servers" VerticalAlignment="Top" Width="79" Foreground="{StaticResource ComboBoxFocusedForegroundThemeBrush}" FontSize="20" FontFamily="Segoe UI Symbol" RenderTransformOrigin="0.5,0.5" UseLayoutRounding="False" d:LayoutRounding="Auto">
+                        <TextBlock.RenderTransform>
+                            <CompositeTransform Rotation="-90"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+
+                    <ScrollViewer x:Name="serversScrollViewer" HorizontalAlignment="Left" Height="85" Margin="320,0,0,0" VerticalAlignment="Top" Width="300" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled" BorderThickness="0">
+                        <Grid x:Name="ServersGridView" Height="64" Width="518" HorizontalAlignment="Left">
+                    </Grid>
+                    </ScrollViewer>
+                    
+                    <TextBlock x:Name="roomsLabel" HorizontalAlignment="Left" Height="40" Margin="611,13,0,0" TextWrapping="Wrap" Text="Rooms" VerticalAlignment="Top" Width="80" Foreground="{StaticResource ComboBoxFocusedForegroundThemeBrush}" FontSize="20" FontFamily="Segoe UI Symbol" RenderTransformOrigin="0.5,0.5" UseLayoutRounding="False" d:LayoutRounding="Auto">
+                        <TextBlock.RenderTransform>
+                            <CompositeTransform Rotation="-90"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
+
+                   <ScrollViewer x:Name="roomsScrollViewer" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled" BorderThickness="0" Margin="665,0,10,0" HorizontalSnapPointsAlignment="Far" HorizontalSnapPointsType="Optional">
+                        <Grid x:Name="RoomsGridView" Height="64" Width="496" HorizontalAlignment="Left">
+                         </Grid>
+                    </ScrollViewer>
+                
+            </Grid>
+        </AppBar>
+    </Page.TopAppBar>
+
+    <Page.BottomAppBar>
+        <AppBar x:Name="BottomAppBar1" AutomationProperties.Name="Bottom App Bar">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <StackPanel x:Name="LeftPanel" Orientation="Horizontal" Background="Black">
+                    <Button x:Name="JoinButton" Style="{StaticResource JoinAppBarButtonStyle}" Tag="Join Channel" Click="JoinButton_Click"/>
+                    <Button x:Name="LeaveButton" Style="{StaticResource LeaveAppBarButtonStyle}" Tag="Leave Channel" Background="White" Click="LeaveButton_Click"/>
+                    <Button x:Name="DisconnectButton" Style="{StaticResource DisconnectAppBarButtonStyle}" Tag="Disconnect Server" Click="DisconnectButton_Click"/>
+                </StackPanel>
+                <StackPanel x:Name="RightPanel" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button x:Name="SettingsButton" Style="{StaticResource ConfigureAppBarButtonStyle}" Tag="Settings" Width="116" Click="SettingsButton_Click"/>
+                    <Button x:Name="HelpButton" Style="{StaticResource HelpAppBarButtonStyle}" Tag="Help" Click="HelpButton_Click"/>
+                </StackPanel>
+
+            </Grid>
+        </AppBar>
+    </Page.BottomAppBar>
+
+ </common:LayoutAwarePage>
